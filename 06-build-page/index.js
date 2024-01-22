@@ -12,7 +12,7 @@ const index = path.join(__dirname, 'project-dist/index.html');
 const style = path.join(__dirname, 'project-dist/style.css');
 
 const content = '';
-const clearDir = async (dir) => {
+const clearDir = (dir) => {
   fs.mkdir(dir, { recursive: true }, (err) => {
     if (err) throw err;
   });
@@ -21,7 +21,7 @@ const clearDir = async (dir) => {
 clearDir(projectDist);
 clearDir(assetsCopy);
 
-const clearFile = async (file) => {
+const clearFile = (file) => {
   fs.writeFile(file, content, (err) => {
     if (err) throw err;
   });
@@ -30,7 +30,7 @@ const clearFile = async (file) => {
 clearFile(index);
 clearFile(style);
 
-const bundleIndex = async () => {
+const bundleIndex = () => {
   let temp;
   let tagsText = {};
   const stream = fs.createReadStream(template, 'utf-8');
@@ -60,7 +60,7 @@ const bundleIndex = async () => {
   });
 };
 
-const bundleStyle = async () => {
+const bundleStyle = () => {
   fs.readdir(styles, { withFileTypes: true }, (err, files) => {
     if (err) throw err;
     files.forEach((file) => {
