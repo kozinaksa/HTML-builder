@@ -11,11 +11,11 @@ rl.prompt();
 
 rl.on('line', function (answer) {
   if (answer.trim() === 'exit') rl.close();
-  fs.appendFile(fileName, answer + '\n', function (error) {
+  fs.appendFile(fileName, `${answer}\n`, function (error) {
     if (error) return console.log(error);
   });
   rl.prompt();
 }).on('close', function () {
-  console.log('Thanks. You wonderful!');
+  console.log('Thanks. You are wonderful!');
   process.exit(0);
 });
