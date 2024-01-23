@@ -12,22 +12,22 @@ fs.mkdir(endPath, { recursive: true }, (err) => {
 fs.readdir(startPath, { withFileTypes: true }, (err, files) => {
   if (err) throw err;
   files.forEach((file) => {
-    fs.copyFile(
-      `${startPath}\\${file.name}`,
-      `${endPath}\\${file.name}`,
-      (err) => {
-        if (err) throw err;
-      },
-    );
+    const startFile = path.join(startPath, file.name);
+    const endFile = path.join(endPath, file.name);
+    fs.copyFile(startFile, endFile, (err) => {
+      if (err) throw err;
+    });
   });
 });
 
 fs.readdir(endPath, (err, files) => {
   if (err) throw err;
   files.forEach((file) => {
-    fs.access(`${startPath}\\${file}`, fs.constants.F_OK, (error) => {
+    const startFile = path.join(startPath, file);
+    const endFile = path.join(endPath, file);
+    fs.access(startFile, fs.constants.F_OK, (error) => {
       if (error) {
-        fs.unlink(`${endPath}\\${file}`, (err) => {
+        fs.unlink(endFile, (err) => {
           if (err) throw err;
         });
       }

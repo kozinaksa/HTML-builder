@@ -7,7 +7,7 @@ fs.readdir(secretPath, { withFileTypes: true }, (err, files) => {
   if (err) console.log(err);
   files.forEach((file) => {
     if (file.isFile()) {
-      const filePath = `${secretPath}\\${file.name}`;
+      const filePath = path.join(secretPath, file.name);
       fs.stat(filePath, (err, stats) => {
         if (err) console.log(err);
         console.log(

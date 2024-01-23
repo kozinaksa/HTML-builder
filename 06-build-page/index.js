@@ -7,9 +7,9 @@ const styles = path.join(__dirname, 'styles');
 const template = path.join(__dirname, 'template.html');
 
 const projectDist = path.join(__dirname, 'project-dist');
-const assetsCopy = path.join(__dirname, 'project-dist/assets');
-const index = path.join(__dirname, 'project-dist/index.html');
-const style = path.join(__dirname, 'project-dist/style.css');
+const assetsCopy = path.join(__dirname, 'project-dist', 'assets');
+const index = path.join(__dirname, 'project-dist', 'index.html');
+const style = path.join(__dirname, 'project-dist', 'style.css');
 
 const content = '';
 const clearDir = (dir) => {
@@ -40,7 +40,7 @@ const bundleIndex = () => {
     let tags = temp.match(reg);
     tags.forEach((tag) => {
       const name = tag.replace('{{', '').replace('}}', '');
-      const file = `${components}\\${name}.html`;
+      const file = path.join(components, `${name}.html`);
       fs.stat(file, (err) => {
         if (err) {
           temp = temp.replace(tag, '');
@@ -64,7 +64,7 @@ const bundleStyle = () => {
   fs.readdir(styles, { withFileTypes: true }, (err, files) => {
     if (err) throw err;
     files.forEach((file) => {
-      const filePath = `${styles}\\${file.name}`;
+      const filePath = path.join(styles, file.name);
       if (file.isFile() && `${path.extname(filePath)}` === '.css') {
         const stream = fs.createReadStream(filePath, 'utf-8');
         stream.on('data', (chunk) => {
@@ -81,38 +81,38 @@ const copyAssets = (dir) => {
   fs.readdir(dir, { withFileTypes: true }, (err, files) => {
     if (err) return err;
     files.forEach((file) => {
+      const filePath = path.join(dir, file.name);
       if (file.isDirectory()) {
-        copyAssets(`${dir}\\${file.name}`);
+        copyAssets(filePath);
       }
       const id = dir.lastIndexOf('assets') + 'assets'.length + 1;
-      const partPath = dir.slice(id, dir.length);
-      clearDir(`${assetsCopy}\\${partPath}`);
-      fs.copyFile(
-        `${dir}\\${file.name}`,
-        `${assetsCopy}\\${partPath}\\${file.name}`,
-        (err) => {
-          if (err) return err;
-        },
-      );
+      const subfolder = dir.slice(id, dir.length);
+      const subfolderPath = path.join(assetsCopy, `${subfolder}`);
+      const subfolderFilePath = path.join(subfolderPath, file.name);
+      clearDir(subfolderPath);
+      fs.copyFile(filePath, subfolderFilePath, (err) => {
+        if (err) return err;
+      });
     });
   });
 };
 
 const delExcesses = (dir) => {
-  const add = dir.slice(-dir.length + dir.lastIndexOf('\\') + 1);
-  let old = assets;
+  const add = dir.slice(-dir.length + dir.lastIndexOf(path.sep) + 1);
+  let oldPath = assets;
   if (add !== 'assets') {
-    old = `${assets}\\${add}`;
+    oldPath = path.join(assets, add);
   }
   fs.readdir(dir, { withFileTypes: true }, (err, files) => {
     if (err) return err;
     files.forEach((file) => {
-      fs.access(`${old}\\${file.name}`, fs.constants.F_OK, (error) => {
+      const oldFilePath = path.join(oldPath, file.name);
+      fs.access(oldFilePath, (error) => {
         if (error) {
+          const filePath = path.join(dir, file.name);
           if (file.isDirectory()) {
-            console.log(`${dir}\\${file.name}`);
             fs.rm(
-              `${dir}\\${file.name}`,
+              filePath,
               {
                 recursive: true,
               },
@@ -121,13 +121,14 @@ const delExcesses = (dir) => {
               },
             );
           } else {
-            fs.unlink(`${dir}\\${file.name}`, (err) => {
+            fs.unlink(filePath, (err) => {
               if (err) return err;
             });
           }
         }
         if (file.isDirectory()) {
-          delExcesses(`${dir}\\${file.name}`);
+          const filePath = path.join(dir, file.name);
+          delExcesses(filePath);
         }
       });
     });

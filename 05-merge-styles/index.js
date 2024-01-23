@@ -14,7 +14,7 @@ fs.writeFile(bundle, content, (err) => {
 fs.readdir(startPath, { withFileTypes: true }, (err, files) => {
   if (err) throw err;
   files.forEach((file) => {
-    const filePath = `${startPath}\\${file.name}`;
+    const filePath = path.join(startPath, file.name);
     if (file.isFile() && `${path.extname(filePath)}` === '.css') {
       const stream = fs.createReadStream(filePath, 'utf-8');
       stream.on('data', (chunk) => {
